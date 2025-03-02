@@ -21,21 +21,18 @@ const objects = {
 
 client.on('message_revoke_everyone', async (after, before) => {
     // Fired whenever a message is deleted by anyone (including you)
-    console.log(after); // message after it was deleted.
+    console.log(after); 
     if (before) {
-        console.log(before); // message before it was deleted.
+        console.log(before); 
 
-        // Construct the message to be sent
-        const messageText = `enviou uma mensagem e apagou! Mensagem: ${before.Message.body}`;
+        const messageText = `enviou uma mensagem e apagou! Mensagem: ${before.body}`;
 
-        // Send the message
         await client.sendMessage(before.from, messageText, {
             mentions: [before.author]
         });
     }
-    const messageText = `enviou uma mensagem e apagou! Mensagem: ${before.Message.body}`;
+    const messageText = `enviou uma mensagem e apagou! Mensagem: ${before.body}`;
 
-        // Send the message
         await client.sendMessage(before.from, messageText);
 });
 
