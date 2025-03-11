@@ -21,7 +21,6 @@ Os usuários podem interagir com o bot usando os seguintes comandos:
 | `!suap` | Link do SUAP: https://suap.ifba.edu.br/accounts/login/?next=/ |
 | `!help` | Lista os comandos disponíveis |
 | `!ping` | Responde com "pong 🏓" |
-| `!teste` | Responde com "Fala trouxa" |
 
 ## Como Usar
 
