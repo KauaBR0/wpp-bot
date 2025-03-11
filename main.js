@@ -1,4 +1,9 @@
-const { Client, LocalAuth } = require('whatsapp-web.js');
+// Load environment variables from .env file for local development
+require('dotenv').config();
+
+const { Client } = require('whatsapp-web.js');
+const { MongoStore } = require('wwebjs-mongo');
+const mongoose = require('mongoose');
 const qrcode = require('qrcode-terminal');
 const express = require('express');
 const qr = require('qrcode');
@@ -41,41 +46,62 @@ const chatJulia = "557499990520@c.us"
 const messageConfirmation = 'Olá!\n\nEu sou o Kowalski 🐧, uma automação criada para auxiliar a comunidade do curso de ADS - IFBA, campus Ssa.\n\nPra entrar no grupo de ADS, por favor informar o número da matrícula.'
 
 const wwebVersion = '2.3000.1015010030-alpha';
-const client = new Client({
-    puppeteer: {
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-accelerated-2d-canvas',
-            '--no-first-run',
-            '--no-zygote',
-            '--single-process',
-            '--disable-gpu'
-        ],
-        headless: true,
-    },
-    authStrategy: new LocalAuth(
-        { dataPath: 'wppSessionData' }
-    ),
-    webVersionCache: {
-        type: 'remote',
-        remotePath: `https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/${wwebVersion}.html`,
-    }
-});
+// MongoDB connection string - use environment variable in production
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://your-mongodb-connection-string';
 
-client.on('qr', async qrText => {
-    // Generate QR code for terminal (optional, can be removed)
-    qrcode.generate(qrText, { small: true });
-    
-    // Generate QR code as data URL for web display
+// Initialize MongoDB store
+let store;
+let client;
+
+// Connect to MongoDB and initialize the client
+async function initializeClient() {
     try {
-        qrCodeData = await qr.toDataURL(qrText);
-        console.log('QR Code generated for web display');
-    } catch (err) {
-        console.error('Error generating QR code:', err);
+        await mongoose.connect(MONGODB_URI);
+        console.log('Connected to MongoDB');
+        
+        store = new MongoStore({ mongoose: mongoose });
+        
+        client = new Client({
+            puppeteer: {
+                args: [
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-dev-shm-usage',
+                    '--disable-accelerated-2d-canvas',
+                    '--no-first-run',
+                    '--no-zygote',
+                    '--single-process',
+                    '--disable-gpu'
+                ],
+                headless: true,
+            },
+            authStrategy: store,
+            webVersionCache: {
+                type: 'remote',
+                remotePath: `https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/${wwebVersion}.html`,
+            }
+        });
+        
+        setupClientEvents();
+        client.initialize();
+    } catch (error) {
+        console.error('Failed to connect to MongoDB:', error);
     }
-});
+}
+
+function setupClientEvents() {
+    client.on('qr', async qrText => {
+        // Generate QR code for terminal (optional, can be removed)
+        qrcode.generate(qrText, { small: true });
+        
+        // Generate QR code as data URL for web display
+        try {
+            qrCodeData = await qr.toDataURL(qrText);
+            console.log('QR Code generated for web display');
+        } catch (err) {
+            console.error('Error generating QR code:', err);
+        }
+    });
 
 const objects = {
     '!link': 'Links úteis: https://linktr.ee/ads.ifba',
@@ -137,9 +163,11 @@ client.on('message', message => {
     return true
 });
 
-client.on('ready', () => {
-    console.log('Client is ready!');
-    connectionStatus = 'connected';
-});
+    client.on('ready', () => {
+        console.log('Client is ready!');
+        connectionStatus = 'connected';
+    });
+}
 
-client.initialize();
+// Initialize the WhatsApp client
+initializeClient();
