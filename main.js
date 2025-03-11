@@ -1,9 +1,28 @@
-const { Client } = require('whatsapp-web.js');
+const {Client, LocalAuth} = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 
-const client = new Client({});
+
+const chatIdTeste = "120363391407848498@g.us"
+const chatId = '557193631886-1433983949@g.us'
+const chatJulia = "557499990520@c.us"
+const messageConfirmation = 'Olá!\n\nEu sou o Kowalski 🐧, uma automação criada para auxiliar a comunidade do curso de ADS - IFBA, campus Ssa.\n\nPra entrar no grupo de ADS, por favor informar o número da matrícula.'
+
+const wwebVersion = '2.3000.1015010030-alpha';
+const client = new Client({
+    puppeteer: {
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    },
+    authStrategy: new LocalAuth(
+        {dataPath: 'wppSessionData'}
+    ),
+    webVersionCache: {
+        type: 'remote',
+        remotePath: `https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/${wwebVersion}.html`,
+    }
+});
+
 client.on('qr', qr => {
-    qrcode.generate(qr, { small: true });
+    qrcode.generate(qr, {small: true});
 });
 
 const objects = {
@@ -14,56 +33,56 @@ const objects = {
     '!suap': 'Link do suap: https://suap.ifba.edu.br/accounts/login/?next=/',
     '!help': 'Comandos disponíveis: \n\n!link \n!discord \n!sala \n!calendario \n!suap \n!ping',
     '!ping': 'pong 🏓',
-    '!teste' : 'Fala trouxa'
+    '!teste': 'Fala trouxa'
 };
-
-
 
 client.on('message_revoke_everyone', async (after, before) => {
     // Fired whenever a message is deleted by anyone (including you)
-    console.log(after); 
+    console.log(after);
+    const messageText = `@${before.author.split('@')[0]} enviou uma mensagem e apagou! \n Mensagem: ${before.body}`;
     if (before) {
-        console.log(before); 
-
-        const messageText = `enviou uma mensagem e apagou! Mensagem: ${before.body}`;
-
-        await client.sendMessage(before.from, messageText, {
+        console.log(before);
+        return await client.sendMessage(before.from, messageText, {
             mentions: [before.author]
         });
     }
-    const messageText = `enviou uma mensagem e apagou! Mensagem: ${before.body}`;
-
-        await client.sendMessage(before.from, messageText);
+    return await client.sendMessage(before.from, messageText);
 });
 
-client.on('group_join_request', async (notification) => {
-    const userId = notification.id.participant;
-    const chat = await client.getChatById(userId);
-    await chat.sendMessage('Sua solicitação para entrar no grupo foi recebida e está sendo analisada. Em breve você receberá uma resposta.');
+
+client.on('group_membership_request', async (notification) => {
+    console.log('New membership request:', notification);
+    // Enviar uma mensagem para a pessoa que solicitou
+    const requesterId = notification.author;
+    await client.sendMessage(requesterId, messageConfirmation);
+    return client.sendMessage(chatJulia, `Nova solicitação de entrada no grupo de ADS: ${requesterId}`);
 });
 
 client.on('group_join', async (notification) => {
     // Usuário foi adicionado ou entrou no grupo
     console.log('join', notification);
     // Enviar mensagem de boas-vindas
+    if (notification.chatId === chatId) {
     const chat = await notification.getChat();
     const user = notification.id.participant; // ID do usuário que entrou no grupo
-    chat.sendMessage(`Bem-vindo ao grupo, @${user.split('@')[0]}!`, {
+    return chat.sendMessage(`Bem-vindo ao grupo, @${user.split('@')[0]}!`, {
         mentions: [user]
     });
+    }
+    return true
 });
 
 client.on('message', message => {
-    console.log(message.body)
+    console.log('event Message', message)
     if (message.body.startsWith('!')) {
         const command = message.body.slice(1).toLowerCase();
-
         if (objects.hasOwnProperty('!' + command)) {
-            message.reply(objects['!' + command]);
+            return message.reply(objects['!' + command]);
         } else {
-            message.reply('Comando não encontrado. Use !help para ver a lista de comandos disponíveis.');
+            return message.reply('Comando não encontrado. Use !help para ver a lista de comandos disponíveis.');
         }
     }
+    return true
 });
 
 client.on('ready', () => {
