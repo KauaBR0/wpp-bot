@@ -1,4 +1,4 @@
-const {Client, LocalAuth} = require('whatsapp-web.js');
+const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 
 
@@ -13,7 +13,7 @@ const client = new Client({
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
     },
     authStrategy: new LocalAuth(
-        {dataPath: 'wppSessionData'}
+        { dataPath: 'wppSessionData' }
     ),
     webVersionCache: {
         type: 'remote',
@@ -22,7 +22,7 @@ const client = new Client({
 });
 
 client.on('qr', qr => {
-    qrcode.generate(qr, {small: true});
+    qrcode.generate(qr, { small: true });
 });
 
 const objects = {
@@ -63,11 +63,11 @@ client.on('group_join', async (notification) => {
     console.log('join', notification);
     // Enviar mensagem de boas-vindas
     if (notification.chatId === chatId) {
-    const chat = await notification.getChat();
-    const user = notification.id.participant; // ID do usuário que entrou no grupo
-    return chat.sendMessage(`Bem-vindo ao grupo, @${user.split('@')[0]}!`, {
-        mentions: [user]
-    });
+        const chat = await notification.getChat();
+        const user = notification.id.participant; // ID do usuário que entrou no grupo
+        return chat.sendMessage(`Bem-vindo ao grupo, @${user.split('@')[0]}!`, {
+            mentions: [user]
+        });
     }
     return true
 });
