@@ -1,2 +1,3 @@
-2025/03/10-22:59:36.607 4074 Creating DB E:\Zrabalho\Codigo\wpp-bot\wppSessionData\session\Default\Local Storage\leveldb since it was missing.
-2025/03/10-22:59:36.747 4074 Reusing MANIFEST E:\Zrabalho\Codigo\wpp-bot\wppSessionData\session\Default\Local Storage\leveldb/MANIFEST-000001
+2025/03/10-23:09:07.660 2ae0 Reusing MANIFEST E:\Zrabalho\Codigo\wpp-bot\wppSessionData\session\Default\Local Storage\leveldb/MANIFEST-000001
+2025/03/10-23:09:07.661 2ae0 Recovering log #3
+2025/03/10-23:09:07.661 2ae0 Reusing old log E:\Zrabalho\Codigo\wpp-bot\wppSessionData\session\Default\Local Storage\leveldb/000003.log 

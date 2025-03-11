@@ -1,5 +1,38 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
+const express = require('express');
+const qr = require('qrcode');
+const path = require('path');
+
+// Express app setup
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Serve static files from the public directory
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Store the QR code data
+let qrCodeData = null;
+let connectionStatus = 'disconnected';
+
+// API endpoint to get the QR code
+app.get('/qrcode', (req, res) => {
+    if (connectionStatus === 'connected') {
+        return res.json({ status: 'connected' });
+    }
+    
+    if (qrCodeData) {
+        return res.json({ qrcode: qrCodeData });
+    }
+    
+    return res.json({ status: 'waiting' });
+});
+
+// Start the server
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Open this URL in your browser to see the QR code`);
+});
 
 
 const chatIdTeste = "120363391407848498@g.us"
@@ -21,8 +54,17 @@ const client = new Client({
     }
 });
 
-client.on('qr', qr => {
-    qrcode.generate(qr, { small: true });
+client.on('qr', async qrText => {
+    // Generate QR code for terminal (optional, can be removed)
+    qrcode.generate(qrText, { small: true });
+    
+    // Generate QR code as data URL for web display
+    try {
+        qrCodeData = await qr.toDataURL(qrText);
+        console.log('QR Code generated for web display');
+    } catch (err) {
+        console.error('Error generating QR code:', err);
+    }
 });
 
 const objects = {
@@ -87,6 +129,7 @@ client.on('message', message => {
 
 client.on('ready', () => {
     console.log('Client is ready!');
+    connectionStatus = 'connected';
 });
 
 client.initialize();
