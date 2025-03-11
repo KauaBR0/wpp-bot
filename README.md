@@ -1,4 +1,4 @@
-# WhatsApp Bot - WWebJS
+# WhatsApp Bot - WWebJS (Vercel Ready)
 
 Este é um bot para WhatsApp utilizando a biblioteca [whatsapp-web.js](https://github.com/pedroslopez/whatsapp-web.js), que permite interação automatizada com mensagens e grupos no WhatsApp Web.
 
@@ -27,16 +27,45 @@ Os usuários podem interagir com o bot usando os seguintes comandos:
 ### 1. Instale as dependências
 Antes de rodar o bot, instale as dependências necessárias com:
 ```bash
-npm install whatsapp-web.js qrcode-terminal
+npm install
 ```
 
-### 2. Execute o bot
+### 2. Execute o bot localmente
 Inicie o bot executando o seguinte comando:
 ```bash
-node index.js
+npm run dev
 ```
 
-Ao rodar o script, um QR Code será gerado no terminal. Escaneie com o WhatsApp para autenticar.
+Ao rodar o script, um QR Code será gerado no terminal e também estará disponível na interface web em http://localhost:3000. Escaneie com o WhatsApp para autenticar.
+
+### 3. Deploy no Vercel
+Este projeto está configurado para ser facilmente implantado no Vercel:
+
+1. Instale a CLI do Vercel:
+```bash
+npm i -g vercel
+```
+
+2. Faça login na sua conta Vercel:
+```bash
+vercel login
+```
+
+3. Deploy do projeto:
+```bash
+vercel
+```
+
+4. Para deploy em produção:
+```bash
+vercel --prod
+```
+
+#### Configuração do Vercel
+O arquivo `vercel.json` já está configurado com:
+- Builds para o servidor Node.js e arquivos estáticos
+- Rotas para a API e arquivos estáticos
+- Configurações de ambiente
 
 ## Eventos Implementados
 - `message_revoke_everyone`: Captura mensagens deletadas e notifica o grupo.
